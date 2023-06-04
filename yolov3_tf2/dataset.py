@@ -100,8 +100,13 @@ IMAGE_FEATURE_MAP = {
 
 def parse_tfrecord(tfrecord, class_table, size):
     x = tf.io.parse_single_example(tfrecord, IMAGE_FEATURE_MAP)
-    x_train = tf.image.decode_jpeg(x['image/encoded'], channels=3)
-    x_train = tf.image.resize(x_train, (size, size))
+
+    # x_train = tf.image.decode_jpeg(x['image/encoded'], channels=3)
+    # x_train = tf.image.resize(x_train, (size, size))
+
+    x_train = tf.io.decode_raw(x['image/encoded'], tf.float32)
+    x_train = tf.reshape(x_train, (size, size, 6))
+    x_train = tf.slice(x_train, [0, 0, 0], [-1, -1, 3]) # TODO Debug
 
     class_text = tf.sparse.to_dense(
         x['image/object/class/text'], default_value='')
